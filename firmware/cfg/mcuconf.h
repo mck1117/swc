@@ -39,13 +39,13 @@
 #define STM32_NO_INIT                       FALSE
 #define STM32_PVD_ENABLE                    FALSE
 #define STM32_PLS                           STM32_PLS_LEV0
-#define STM32_HSI_ENABLED                   TRUE
-#define STM32_HSI14_ENABLED                 TRUE
-#define STM32_HSI48_ENABLED                 FALSE
-#define STM32_LSI_ENABLED                   TRUE
+#define STM32_HSI_ENABLED                   FALSE
+#define STM32_HSI14_ENABLED                 FALSE
+#define STM32_HSI48_ENABLED                 TRUE
+#define STM32_LSI_ENABLED                   FALSE
 #define STM32_HSE_ENABLED                   FALSE
 #define STM32_LSE_ENABLED                   FALSE
-#define STM32_SW                            STM32_SW_PLL
+#define STM32_SW                            STM32_SW_HSI48
 #define STM32_PLLSRC                        STM32_PLLSRC_HSI_DIV2
 #define STM32_PREDIV_VALUE                  1
 #define STM32_PLLMUL_VALUE                  12
@@ -55,10 +55,10 @@
 #define STM32_MCOPRE                        STM32_MCOPRE_DIV1
 #define STM32_PLLNODIV                      STM32_PLLNODIV_DIV2
 #define STM32_USBSW                         STM32_USBSW_HSI48
-#define STM32_CECSW                         STM32_CECSW_HSI
-#define STM32_I2C1SW                        STM32_I2C1SW_HSI
+#define STM32_CECSW                         STM32_CECSW_OFF
+#define STM32_I2C1SW                        STM32_I2C1SW_SYSCLK
 #define STM32_USART1SW                      STM32_USART1SW_PCLK
-#define STM32_RTCSEL                        STM32_RTCSEL_LSI
+#define STM32_RTCSEL                        STM32_RTCSEL_NOCLOCK
 
 /*
  * IRQ system settings.
@@ -75,7 +75,7 @@
 /*
  * ADC driver system settings.
  */
-#define STM32_ADC_USE_ADC1                  FALSE
+#define STM32_ADC_USE_ADC1                  TRUE
 #define STM32_ADC_ADC1_CFGR2                ADC_CFGR2_CKMODE_ADCCLK
 #define STM32_ADC_ADC1_DMA_PRIORITY         2
 #define STM32_ADC_ADC1_DMA_IRQ_PRIORITY     2
@@ -102,7 +102,7 @@
 /*
  * I2C driver system settings.
  */
-#define STM32_I2C_USE_I2C1                  FALSE
+#define STM32_I2C_USE_I2C1                  TRUE
 #define STM32_I2C_BUSY_TIMEOUT              50
 #define STM32_I2C_I2C1_IRQ_PRIORITY         3
 #define STM32_I2C_USE_DMA                   TRUE
@@ -147,13 +147,13 @@
 /*
  * SERIAL driver system settings.
  */
-#define STM32_SERIAL_USE_USART1             FALSE
+#define STM32_SERIAL_USE_USART1             TRUE
 #define STM32_SERIAL_USE_USART2             FALSE
 
 /*
  * SPI driver system settings.
  */
-#define STM32_SPI_USE_SPI1                  FALSE
+#define STM32_SPI_USE_SPI1                  TRUE
 #define STM32_SPI_SPI1_DMA_PRIORITY         1
 #define STM32_SPI_SPI1_IRQ_PRIORITY         2
 #define STM32_SPI_SPI1_RX_DMA_STREAM        STM32_DMA_STREAM_ID(1, 2)
