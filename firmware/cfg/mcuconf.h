@@ -39,16 +39,16 @@
 #define STM32_NO_INIT                       FALSE
 #define STM32_PVD_ENABLE                    FALSE
 #define STM32_PLS                           STM32_PLS_LEV0
-#define STM32_HSI_ENABLED                   FALSE
-#define STM32_HSI14_ENABLED                 FALSE
-#define STM32_HSI48_ENABLED                 TRUE
-#define STM32_LSI_ENABLED                   FALSE
+#define STM32_HSI_ENABLED                   TRUE
+#define STM32_HSI14_ENABLED                 TRUE
+#define STM32_HSI48_ENABLED                 FALSE
+#define STM32_LSI_ENABLED                   TRUE
 #define STM32_HSE_ENABLED                   FALSE
 #define STM32_LSE_ENABLED                   FALSE
-#define STM32_SW                            STM32_SW_HSI48
-#define STM32_PLLSRC                        STM32_PLLSRC_HSI_DIV2
+#define STM32_SW                            STM32_SW_PLL
+#define STM32_PLLSRC                        STM32_PLLSRC_HSI
 #define STM32_PREDIV_VALUE                  1
-#define STM32_PLLMUL_VALUE                  12
+#define STM32_PLLMUL_VALUE                  6
 #define STM32_HPRE                          STM32_HPRE_DIV1
 #define STM32_PPRE                          STM32_PPRE_DIV1
 #define STM32_MCOSEL                        STM32_MCOSEL_NOCLOCK
@@ -153,7 +153,7 @@
 /*
  * SPI driver system settings.
  */
-#define STM32_SPI_USE_SPI1                  TRUE
+#define STM32_SPI_USE_SPI1                  FALSE
 #define STM32_SPI_SPI1_DMA_PRIORITY         1
 #define STM32_SPI_SPI1_IRQ_PRIORITY         2
 #define STM32_SPI_SPI1_RX_DMA_STREAM        STM32_DMA_STREAM_ID(1, 2)
