@@ -8,13 +8,16 @@
 #define LEFT_LED_LINE PAL_LINE(GPIOA, 15)
 #define RIGHT_LED_LINE PAL_LINE(GPIOB, 2)
 
-static const CANConfig canConfig500 =
+static constexpr uint32_t txCanId = 0x100;
+static constexpr uint32_t rxCanId = 0x101;
+
+static const CANConfig canConfig100 =
 {
     CAN_MCR_ABOM | CAN_MCR_AWUM | CAN_MCR_TXFP,
     /*
-     For 48MHz http://www.bittiming.can-wiki.info/ gives us Pre-scaler=6, Seq 1=13 and Seq 2=2. Subtract '1' for register values
+     For 48MHz http://www.bittiming.can-wiki.info/ gives us Pre-scaler=30, Seq 1=13 and Seq 2=2. Subtract '1' for register values
     */
-    CAN_BTR_SJW(0) | CAN_BTR_BRP(5)  | CAN_BTR_TS1(12) | CAN_BTR_TS2(1),
+    CAN_BTR_SJW(1) | CAN_BTR_BRP(29) | CAN_BTR_TS1(12) | CAN_BTR_TS2(1),
 };
 
 static void setLeftStatusLed(bool state)
@@ -62,7 +65,7 @@ int main(void)
 
     initStatusLeds();
 
-    canStart(&CAND1, &canConfig500);
+    canStart(&CAND1, &canConfig100);
 
     left.Init();
     right.Init();
@@ -72,8 +75,26 @@ int main(void)
         setLeftStatusLed(left.CheckAliveAndReinit());
         setRightStatusLed(right.CheckAliveAndReinit());
 
-        left.WriteLeds(left.ReadButtons());
-        right.WriteLeds(right.ReadButtons());
+        auto buttonsLeft = left.ReadButtons();
+        auto knobLeft = left.ReadKnob();
+        auto buttonsRight = right.ReadButtons();
+        auto knobRight = right.ReadKnob();
+
+        left.WriteLeds(buttonsLeft);
+        right.WriteLeds(buttonsRight);
+
+        CANTxFrame frame;
+        frame.SID = txCanId;
+        frame.IDE = 0;
+        frame.RTR = 0;
+
+        frame.data8[0] = buttonsLeft;
+        frame.data8[1] = buttonsRight;
+        frame.data8[2] = knobLeft;
+        frame.data8[3] = knobRight;
+        frame.DLC = 4;
+
+        canTransmitTimeout(&CAND1, 0, &frame, TIME_IMMEDIATE);
 
         chThdSleepMilliseconds(10);
     }
