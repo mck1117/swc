@@ -8,6 +8,9 @@ public:
     Wing(ioline_t scl, ioline_t sda);
     void Init();
 
+    // Returns true if the wing responds
+    bool CheckAlive();
+
     uint8_t ReadButtons();
     void WriteLeds(uint8_t);
 
@@ -27,6 +30,9 @@ namespace Pca9557
     // Set each bit to 1 to use as an input, 0 to use as an output
     void Configure(BitbangI2c& i2c, uint8_t offset, uint8_t config);
 
-    // Set each bit to 1 for channels that should output the inversion of the output value.
+    // Set each bit to 1 for input channels that should be inverted
     void SetInvert(BitbangI2c& i2c, uint8_t offset, uint8_t invert);
+
+    // Get the value of the invert register
+    uint8_t GetInvert(BitbangI2c& i2c, uint8_t offset);
 };

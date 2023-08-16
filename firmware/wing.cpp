@@ -62,7 +62,21 @@ void Wing::Init()
     WriteLeds(0);
 }
 
-void Wing::WriteLeds(uint8_t)
+bool Wing::CheckAlive()
+{
+    BitbangI2c bus(m_scl, m_sda);
+
+    auto readBefore = Pca9557::GetInvert(bus, 2);
+
+    // Toggle a bit for an unused output
+    auto expect = readBefore ^ 0x10;
+    Pca9557::SetInvert(bus, 2, expect);
+
+    // Check that the bit changed!
+    return expect == Pca9557::GetInvert(bus, 2);
+}
+
+void Wing::WriteLeds(uint8_t leds)
 {
     
 }
@@ -129,5 +143,10 @@ void Configure(BitbangI2c& i2c, uint8_t offset, uint8_t config)
 void SetInvert(BitbangI2c& i2c, uint8_t offset, uint8_t invert)
 {
     DoWrite(i2c, offset, Opcode::PolarityInversion, invert);
+}
+
+uint8_t GetInvert(BitbangI2c& i2c, uint8_t offset)
+{
+    return DoRead(i2c, offset, Opcode::PolarityInversion);
 }
 }
