@@ -11,12 +11,16 @@ public:
     // Returns true if the wing responds
     bool CheckAlive();
 
+    bool CheckAliveAndReinit();
+
     uint8_t ReadButtons();
     void WriteLeds(uint8_t);
 
 private:
     ioline_t m_scl;
     ioline_t m_sda;
+
+    bool m_wasAlive = false;
 };
 
 namespace Pca9557

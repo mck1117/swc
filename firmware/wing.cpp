@@ -68,12 +68,26 @@ bool Wing::CheckAlive()
 
     auto readBefore = Pca9557::GetInvert(bus, 2);
 
-    // Toggle a bit for an unused output
+    // Toggle an invert bit for an unused channel
     auto expect = readBefore ^ 0x10;
     Pca9557::SetInvert(bus, 2, expect);
 
     // Check that the bit changed!
     return expect == Pca9557::GetInvert(bus, 2);
+}
+
+bool Wing::CheckAliveAndReinit()
+{
+    bool alive = CheckAlive();
+
+    if (alive && !m_wasAlive)
+    {
+        Init();
+    }
+
+    m_wasAlive = alive;
+
+    return alive;
 }
 
 void Wing::WriteLeds(uint8_t leds)

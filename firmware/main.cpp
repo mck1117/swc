@@ -69,8 +69,8 @@ int main(void)
 
     while (true)
     {
-        setLeftStatusLed(left.CheckAlive());
-        setRightStatusLed(right.CheckAlive());
+        setLeftStatusLed(left.CheckAliveAndReinit());
+        setRightStatusLed(right.CheckAliveAndReinit());
 
         left.WriteLeds(left.ReadButtons());
         right.WriteLeds(right.ReadButtons());
