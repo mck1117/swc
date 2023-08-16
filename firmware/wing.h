@@ -14,6 +14,7 @@ public:
     bool CheckAliveAndReinit();
 
     uint8_t ReadButtons();
+    uint8_t ReadKnob();
     void WriteLeds(uint8_t);
 
 private:

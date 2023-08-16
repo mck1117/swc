@@ -123,6 +123,12 @@ uint8_t Wing::ReadButtons()
     return pack(b5, b4, b3, b2, b1);
 }
 
+uint8_t Wing::ReadKnob()
+{
+    // TODO: implement
+    return 0;
+}
+
 namespace Pca9557
 {
 // PCA9557 - 8.3.2.1
