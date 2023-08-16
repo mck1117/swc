@@ -1,7 +1,7 @@
 #include "ch.h"
 #include "hal.h"
 
-// #include "wing.h"
+#include "wing.h"
 
 #include <cstring>
 
@@ -50,13 +50,10 @@ static void initStatusLeds()
     palSetLineMode(RIGHT_LED_LINE, PAL_MODE_OUTPUT_PUSHPULL);
 }
 
-// static constexpr I2CConfig i2cConfig =
-// {
+Wing left (PAL_LINE(GPIOB, 6), PAL_LINE(GPIOB, 7));
+Wing right(PAL_LINE(GPIOB, 10), PAL_LINE(GPIOB, 11));
 
-// };
-
-// Wing left (I2CD1, i2cConfig, PAL_LINE(GPIOB, 6), PAL_LINE(GPIOB, 7));
-// Wing right(I2CD1, i2cConfig, PAL_LINE(GPIOB, 10), PAL_LINE(GPIOB, 11));
+static_assert(STM32_SYSCLK == 48e6);
 
 int main(void)
 {
@@ -67,24 +64,15 @@ int main(void)
 
     canStart(&CAND1, &canConfig500);
 
-    // left.Init();
-    // right.Init();
+    left.Init();
+    right.Init();
 
     while (true) {
-        setLeftStatusLed(true);
-        chThdSleepMilliseconds(100);
-        setLeftStatusLed(false);
-        chThdSleepMilliseconds(100);
-        setRightStatusLed(true);
-        chThdSleepMilliseconds(100);
-        setRightStatusLed(false);
-        chThdSleepMilliseconds(100);
+        auto l = left.ReadButtons();
 
-        // auto l = left.ReadButtons();
-
-        // setLeftStatusLed(l & 0x1);
-        // setRightStatusLed(l & 0x2);
-        //chThdSleepMilliseconds(100);
+        setLeftStatusLed(l & 0x1);
+        setRightStatusLed(l & 0x2);
+        chThdSleepMilliseconds(10);
     }
 }
 
