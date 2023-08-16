@@ -78,7 +78,19 @@ bool Wing::CheckAlive()
 
 void Wing::WriteLeds(uint8_t leds)
 {
-    
+    bool l1 = getbit(leds, 0);
+    bool l2 = getbit(leds, 1);
+    bool l3 = getbit(leds, 2);
+    bool l4 = getbit(leds, 3);
+    bool l5 = getbit(leds, 4);
+
+    //          bit 7  6  5   4  3   2   1  0
+    auto c1 = pack(l2, 0, 0, l1, 0,  0,  0, 0);
+    auto c3 = pack(l4, 0, 0,  0, 0, l5, l3, 0);
+
+    BitbangI2c bus(m_scl, m_sda);
+    Pca9557::Write(bus, 0, c1);
+    Pca9557::Write(bus, 2, c3);
 }
 
 uint8_t Wing::ReadButtons()

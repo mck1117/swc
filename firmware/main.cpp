@@ -71,6 +71,10 @@ int main(void)
     {
         setLeftStatusLed(left.CheckAlive());
         setRightStatusLed(right.CheckAlive());
+
+        left.WriteLeds(left.ReadButtons());
+        right.WriteLeds(right.ReadButtons());
+
         chThdSleepMilliseconds(10);
     }
 }
