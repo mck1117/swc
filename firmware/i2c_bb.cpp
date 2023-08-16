@@ -160,8 +160,7 @@ uint8_t BitbangI2c::readByte(bool ack)
 
 void BitbangI2c::waitQuarterBit()
 {
-	// This yields a bitrate of about 320khz on a 168MHz F4
-	for (size_t i = 0; i < 30; i++)
+	for (size_t i = 0; i < 6; i++)
 	{
 		__asm__ volatile ("nop");
 	}
