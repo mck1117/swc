@@ -123,13 +123,13 @@ CSRC = $(ALLCSRC) \
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
-CPPSRC = $(ALLCPPSRC) main.cpp
+CPPSRC = $(ALLCPPSRC) main.cpp wing.cpp
 
 # List ASM source files here.
 ASMSRC = $(ALLASMSRC)
 
 # List ASM with preprocessor source files here.
-ASMXSRC = $(ALLXASMSRC)
+ASMXSRC = $(ALLXASMSRC) main_hardfault_asm.S
 
 # Inclusion directories.
 INCDIR = $(CONFDIR) $(ALLINC) $(TESTINC)
