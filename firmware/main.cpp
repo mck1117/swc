@@ -20,6 +20,13 @@ static const CANConfig canConfig100 =
     CAN_BTR_SJW(1) | CAN_BTR_BRP(29) | CAN_BTR_TS1(12) | CAN_BTR_TS2(1),
 };
 
+static void initCan()
+{
+    palSetPadMode(GPIOA, 11, PAL_MODE_ALTERNATE(4));
+    palSetPadMode(GPIOA, 12, PAL_MODE_ALTERNATE(4));
+    canStart(&CAND1, &canConfig100);
+}
+
 static void setLeftStatusLed(bool state)
 {
     if (state)
@@ -64,8 +71,7 @@ int main(void)
     chSysInit();
 
     initStatusLeds();
-
-    canStart(&CAND1, &canConfig100);
+    initCan();
 
     left.Init();
     right.Init();
