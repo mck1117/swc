@@ -8,8 +8,8 @@
 #define LEFT_LED_LINE PAL_LINE(GPIOA, 15)
 #define RIGHT_LED_LINE PAL_LINE(GPIOB, 2)
 
-static constexpr uint32_t txCanId = 0x100;
-static constexpr uint32_t rxCanId = 0x101;
+static constexpr uint32_t txCanId = 0x741;
+static constexpr uint32_t rxCanId = 0x742;
 
 static const CANConfig canConfig100 =
 {
@@ -60,10 +60,62 @@ static void initStatusLeds()
     palSetLineMode(RIGHT_LED_LINE, PAL_MODE_OUTPUT_PUSHPULL);
 }
 
-Wing left (PAL_LINE(GPIOB, 6), PAL_LINE(GPIOB, 7));
-Wing right(PAL_LINE(GPIOB, 10), PAL_LINE(GPIOB, 11));
+static Wing left (PAL_LINE(GPIOB, 6), PAL_LINE(GPIOB, 7));
+static Wing right(PAL_LINE(GPIOB, 10), PAL_LINE(GPIOB, 11));
 
 static_assert(STM32_SYSCLK == 48e6);
+
+static const uint16_t startupAnimation[] =
+{
+    0x0001,
+    0x0002,
+    0x0004,
+    0x0008,
+    0x0010,
+    0x1000,
+    0x0800,
+    0x0400,
+    0x0200,
+    0x0100,
+    0x0200,
+    0x0400,
+    0x0800,
+    0x1000,
+    0x0010,
+    0x0008,
+    0x0004,
+    0x0002,
+    0x0001,
+
+    // Turn all on for a moment
+    0x1F1F,
+    0x1F1F,
+    0x1F1F,
+    0x1F1F,
+    0x1F1F,
+};
+
+static uint8_t brightness = 1;
+static uint8_t brightness2 = 5;
+static const uint8_t maxBrightness = 10;
+static uint8_t brightCounter = 0;
+
+static void driveLeds(uint8_t ledsLeft, uint8_t ledsRight)
+{
+    brightCounter++;
+    if (brightCounter == maxBrightness) brightCounter = 0;
+
+    uint8_t pressedMask = brightness2 > brightCounter ? 0x1F : 0;
+
+    uint8_t l = brightness > brightCounter ? 0x1F : 0;
+    uint8_t r = l;
+
+    l |= (ledsLeft & pressedMask);
+    r |= (ledsRight & pressedMask);
+
+    left.WriteLeds(l);
+    right.WriteLeds(r);
+}
 
 int main(void)
 {
@@ -76,33 +128,54 @@ int main(void)
     left.Init();
     right.Init();
 
+    for (size_t i = 0; i < (sizeof(startupAnimation) / sizeof(startupAnimation[0])); i++)
+    {
+        uint16_t data = startupAnimation[i];
+        uint8_t l = data & 0xFF;
+        uint8_t r = data >> 8;
+
+        left.WriteLeds(l);
+        right.WriteLeds(r);
+
+        chThdSleepMilliseconds(80);
+    }
+
+    uint8_t canCounter = 0;
+
     while (true)
     {
-        setLeftStatusLed(left.CheckAliveAndReinit());
-        setRightStatusLed(right.CheckAliveAndReinit());
+        // setLeftStatusLed(left.CheckAliveAndReinit());
+        // setRightStatusLed(right.CheckAliveAndReinit());
 
         auto buttonsLeft = left.ReadButtons();
         auto knobLeft = left.ReadKnob();
         auto buttonsRight = right.ReadButtons();
         auto knobRight = right.ReadKnob();
 
-        left.WriteLeds(buttonsLeft);
-        right.WriteLeds(buttonsRight);
+        // default to LEDs mirror buttons
+        auto ledsLeft = buttonsLeft;
+        auto ledsRight = buttonsRight;
 
-        CANTxFrame frame;
-        frame.SID = txCanId;
-        frame.IDE = 0;
-        frame.RTR = 0;
+        driveLeds(ledsLeft, ledsRight);
 
-        frame.data8[0] = buttonsLeft;
-        frame.data8[1] = buttonsRight;
-        frame.data8[2] = knobLeft;
-        frame.data8[3] = knobRight;
-        frame.DLC = 4;
+        if (canCounter == 0)
+        {
+            canCounter = 20;
+            canCounter--;
 
-        canTransmitTimeout(&CAND1, 0, &frame, TIME_IMMEDIATE);
+            CANTxFrame frame;
+            frame.SID = txCanId;
+            frame.IDE = 0;
+            frame.RTR = 0;
 
-        chThdSleepMilliseconds(10);
+            frame.data8[0] = buttonsLeft;
+            frame.data8[1] = buttonsRight;
+            frame.data8[2] = knobLeft;
+            frame.data8[3] = knobRight;
+            frame.DLC = 4;
+
+            canTransmitTimeout(&CAND1, 0, &frame, TIME_IMMEDIATE);
+        }
     }
 }
 
