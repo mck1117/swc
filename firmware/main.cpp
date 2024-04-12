@@ -11,20 +11,29 @@
 static constexpr uint32_t txCanId = 0x741;
 static constexpr uint32_t rxCanId = 0x742;
 
-static const CANConfig canConfig100 =
+// static const CANConfig canConfig100 =
+// {
+//     CAN_MCR_ABOM | CAN_MCR_AWUM | CAN_MCR_TXFP,
+//     /*
+//      For 48MHz http://www.bittiming.can-wiki.info/ gives us Pre-scaler=30, Seq 1=13 and Seq 2=2. Subtract '1' for register values
+//     */
+//     CAN_BTR_SJW(1) | CAN_BTR_BRP(29) | CAN_BTR_TS1(12) | CAN_BTR_TS2(1),
+// };
+
+static constexpr CANConfig canConfig1000 =
 {
     CAN_MCR_ABOM | CAN_MCR_AWUM | CAN_MCR_TXFP,
     /*
      For 48MHz http://www.bittiming.can-wiki.info/ gives us Pre-scaler=30, Seq 1=13 and Seq 2=2. Subtract '1' for register values
     */
-    CAN_BTR_SJW(1) | CAN_BTR_BRP(29) | CAN_BTR_TS1(12) | CAN_BTR_TS2(1),
+    CAN_BTR_SJW(1) | CAN_BTR_BRP(2) | CAN_BTR_TS1(12) | CAN_BTR_TS2(1),
 };
 
 static void initCan()
 {
     palSetPadMode(GPIOA, 11, PAL_MODE_ALTERNATE(4));
     palSetPadMode(GPIOA, 12, PAL_MODE_ALTERNATE(4));
-    canStart(&CAND1, &canConfig100);
+    canStart(&CAND1, &canConfig1000);
 }
 
 static void setLeftStatusLed(bool state)
@@ -156,7 +165,14 @@ int main(void)
         auto ledsLeft = buttonsLeft;
         auto ledsRight = buttonsRight;
 
-        driveLeds(ledsLeft, ledsRight);
+        {
+            CANRxFrame rxFrame;
+            msg_t res = canReceiveTimeout(&CAND1, 0, &rxFrame, TIME_IMMEDIATE);
+            if (res == MSG_OK && rxFrame.SID == rxCanId)
+            {
+                driveLeds(rxFrame.data8[0], rxFrame.data8[1]);
+            }
+        }
 
         if (canCounter == 0)
         {
