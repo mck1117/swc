@@ -104,8 +104,8 @@ static const uint16_t startupAnimation[] =
     0x1F1F,
 };
 
-static uint8_t brightness = 1;
-static uint8_t brightness2 = 5;
+static uint8_t brightness = 0;
+static uint8_t brightness2 = 3;
 static const uint8_t maxBrightness = 10;
 static uint8_t brightCounter = 0;
 
@@ -126,12 +126,25 @@ static void driveLeds(uint8_t ledsLeft, uint8_t ledsRight)
     right.WriteLeds(r);
 }
 
+static const CANFilter canFilter =
+{
+    .filter = 0,
+    .mode = 1,
+    .scale = 1,
+    .assignment = 0,
+    .register1 = 0xE8400000,
+    .register2 = 0
+};
+
 int main(void)
 {
     halInit();
     chSysInit();
 
     initStatusLeds();
+
+    canSTM32SetFilters(&CAND1, 1, 1, &canFilter);
+
     initCan();
 
     left.Init();
@@ -151,33 +164,34 @@ int main(void)
 
     uint8_t canCounter = 0;
 
+    uint8_t ledsLeft = 0;
+    uint8_t ledsRight = 0;
+
     while (true)
     {
-        // setLeftStatusLed(left.CheckAliveAndReinit());
-        // setRightStatusLed(right.CheckAliveAndReinit());
+        setLeftStatusLed(left.CheckAliveAndReinit());
+        setRightStatusLed(right.CheckAliveAndReinit());
 
         auto buttonsLeft = left.ReadButtons();
         auto knobLeft = left.ReadKnob();
         auto buttonsRight = right.ReadButtons();
         auto knobRight = right.ReadKnob();
 
-        // default to LEDs mirror buttons
-        auto ledsLeft = buttonsLeft;
-        auto ledsRight = buttonsRight;
-
         {
             CANRxFrame rxFrame;
             msg_t res = canReceiveTimeout(&CAND1, 0, &rxFrame, TIME_IMMEDIATE);
             if (res == MSG_OK && rxFrame.SID == rxCanId)
             {
-                driveLeds(rxFrame.data8[0], rxFrame.data8[1]);
+                ledsLeft = rxFrame.data8[0];
+                ledsRight = rxFrame.data8[1];
             }
         }
+
+        driveLeds(ledsLeft, ledsRight);
 
         if (canCounter == 0)
         {
             canCounter = 20;
-            canCounter--;
 
             CANTxFrame frame;
             frame.SID = txCanId;
@@ -192,6 +206,8 @@ int main(void)
 
             canTransmitTimeout(&CAND1, 0, &frame, TIME_IMMEDIATE);
         }
+
+        canCounter--;
     }
 }
 
