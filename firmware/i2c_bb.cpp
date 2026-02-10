@@ -84,19 +84,21 @@ void BitbangI2c::sendBit(bool val)
 	if (val)
 	{
 		sda_high();
-	} else
+	}
+	else
 	{
 		sda_low();
 	}
 
 	// Data setup time (~100ns min)
-	waitQuarterBit();
+	__asm__ volatile ("nop");
 
 	// Strobe the clock
 	scl_high();
+	// minimum clock high time 600ns
 	waitQuarterBit();
 	scl_low();
-	waitQuarterBit();
+	// waitQuarterBit();
 }
 
 bool BitbangI2c::readBit()
@@ -160,10 +162,26 @@ uint8_t BitbangI2c::readByte(bool ack)
 
 void BitbangI2c::waitQuarterBit()
 {
-	for (size_t i = 0; i < 6; i++)
-	{
-		__asm__ volatile ("nop");
-	}
+	// for (volatile size_t i = 0; i < 2; i++)
+	// {
+	// 	__asm__ volatile ("nop");
+	// }
+
+	__asm__ volatile ("nop");
+	__asm__ volatile ("nop");
+	__asm__ volatile ("nop");
+	__asm__ volatile ("nop");
+	__asm__ volatile ("nop");
+	__asm__ volatile ("nop");
+	__asm__ volatile ("nop");
+	__asm__ volatile ("nop");
+	__asm__ volatile ("nop");
+	__asm__ volatile ("nop");
+	__asm__ volatile ("nop");
+	__asm__ volatile ("nop");
+	__asm__ volatile ("nop");
+	__asm__ volatile ("nop");
+	__asm__ volatile ("nop");
 }
 
 void BitbangI2c::write(uint8_t addr, const uint8_t* writeData, size_t writeSize)
